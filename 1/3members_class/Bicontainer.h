@@ -1,63 +1,105 @@
 #pragma once
 #include <vector>
+#include "Timer.h"
 
 template <typename T>
 class Bicontainer {
-  T* arr;
-  size_t sz;
-  std::vector<T> v;
+  T* arr_;
+  size_t sz_;
+  std::vector<T> v_;
 
 public:
 //  Bicontainer(std::initializer_list<T> array, size_t size, std::vector<T> vec) : arr(array), sz(size), v(vec) {}
 //  // assignment constructor with initializer list for simple types
 
-  Bicontainer(T* array = nullptr, size_t size = 0, std::vector<T> vec = {}) : arr(array), sz(size), v(vec) {}
-    // assignment constructor + defaut constructor
+  Bicontainer(T* array = nullptr, size_t size = 0, const std::vector<T>& vec = {}) : arr_(array), sz_(size), v_(vec) {}
+    // assignment constructor + defaut constructor (size should be equal to array size!)
 
-  size_t Size() { return sz; }
+  Bicontainer(T* array, size_t size, std::vector<T>&& vec) : arr_(array), sz_(size), v_(std::move(vec)) {}
+
+  size_t Size() { return sz_; }
 
   Bicontainer(const Bicontainer<T>& other);
+  Bicontainer(Bicontainer<T>&& other);
 
   Bicontainer& operator=(const Bicontainer<T>& other);
+  Bicontainer& operator=(Bicontainer<T>&& other);
 
   ~Bicontainer();
 };
 
 template <typename T>
 Bicontainer<T>::Bicontainer(const Bicontainer<T>& other) {
-  sz = other.sz;
+  Timer t("Copy constructor");
 
-  arr = reinterpret_cast<T*>(new uint8_t(sz * sizeof(T))); // allocate memory for arr
-  for (size_t i = 0; i < sz; i++)
-    arr[i] = T(other.arr[i]); // create arr members using T copy constructor
+  sz_ = other.sz_;
 
-  v = other.v;
+  arr_ = reinterpret_cast<T*>(new int8_t[sz_ * sizeof(T)]); // allocate memory for arr
+  for (size_t i = 0; i < sz_; i++)
+    new(arr_ + i) T(other.arr_[i]); // create arr members using T copy constructor
+
+  v_ = other.v_;
+}
+
+template <typename T>
+Bicontainer<T>::Bicontainer(Bicontainer<T>&& other) {
+  Timer t("Move constructor");
+
+  sz_ = other.sz_;
+
+  arr_ = reinterpret_cast<T*>(new int8_t[sz_ * sizeof(T)]); // allocate memory for arr
+  for (size_t i = 0; i < sz_; i++)
+    new(arr_ + i) T(std::move(other.arr_[i])); // create arr members using T copy constructor
+
+  v_ = std::move(other.v_);
 }
 
 template <typename T>
 Bicontainer<T>& Bicontainer<T>::operator=(const Bicontainer<T>& other) {
-  for (size_t i = 0; i < sz; i++)
-    arr[i].~T(); // explicitly delete arr members
+  Timer t("Copy assignment");
 
-  delete[] arr; // free memory
+  for (size_t i = 0; i < sz_; i++)
+    (arr_ + i)->~T(); // explicitly delete arr members
 
-  sz = other.sz;
+  delete[] reinterpret_cast<int8_t*>(arr_); // free memory
 
-  arr = reinterpret_cast<T*>(new uint8_t[sz * sizeof(T)]); // allocate memory for arr
-  for (size_t i = 0; i < sz; i++)
-    arr[i] = T(other.arr[i]); // create arr members using T copy constructor
+  sz_ = other.sz_;
 
-  v = other.v;
+  arr_ = reinterpret_cast<T*>(new int8_t[sz_ * sizeof(T)]); // allocate memory for arr
+  for (size_t i = 0; i < sz_; i++)
+    new(arr_ + i) T(other.arr_[i]); // create arr members using T copy constructor
+
+  v_ = other.v_;
+
+  return *this;
+}
+
+template <typename T>
+Bicontainer<T>& Bicontainer<T>::operator=(Bicontainer<T>&& other) {
+  Timer t("Move assignment");
+
+  for (size_t i = 0; i < sz_; i++)
+    (arr_ + i)->~T(); // explicitly delete arr members
+
+  delete[] reinterpret_cast<int8_t*>(arr_); // free memory
+
+  sz_ = other.sz_;
+
+  arr_ = reinterpret_cast<T*>(new int8_t[sz_ * sizeof(T)]); // allocate memory for arr
+  for (size_t i = 0; i < sz_; i++)
+    new(arr_ + i) T(std::move(other.arr_[i])); // create arr members using T copy constructor
+
+  v_ = std::move(other.v_);
 
   return *this;
 }
 
 template <typename T>
 Bicontainer<T>::~Bicontainer() {
-  for (size_t i = 0; i < sz; i++)
-    arr[i].~T(); // explicitly delete arr members
+  for (size_t i = 0; i < sz_; i++)
+    (arr_ + i)->~T(); // explicitly delete arr members
 
-  delete[] arr; // free memory
-  v.~vector(); // delete v
+  delete[] reinterpret_cast<int8_t*>(arr_); // free memory
+  v_.~vector(); // delete v
 }
 
