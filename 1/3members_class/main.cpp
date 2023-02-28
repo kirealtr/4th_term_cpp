@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 
-#define REALLY_BIG_SIZE     1e5
+#define REALLY_BIG_SIZE     5e7
 
 int main() {
   std::vector<int> v1(REALLY_BIG_SIZE, 0);

@@ -49,7 +49,7 @@ Bicontainer<T>::Bicontainer(Bicontainer<T>&& other) {
 
   arr_ = reinterpret_cast<T*>(new int8_t[sz_ * sizeof(T)]); // allocate memory for arr
   for (size_t i = 0; i < sz_; i++)
-    new(arr_ + i) T(std::move(other.arr_[i])); // create arr members using T copy constructor
+    new(arr_ + i) T(std::move(other.arr_[i])); // create arr members using T move constructor
 
   v_ = std::move(other.v_);
 }
@@ -58,10 +58,12 @@ template <typename T>
 Bicontainer<T>& Bicontainer<T>::operator=(const Bicontainer<T>& other) {
   Timer t("Copy assignment");
 
-  for (size_t i = 0; i < sz_; i++)
-    (arr_ + i)->~T(); // explicitly delete arr members
+  if (sz_ > 0) {
+    for (size_t i = 0; i < sz_; i++)
+      (arr_ + i)->~T(); // explicitly delete arr members
 
-  delete[] reinterpret_cast<int8_t*>(arr_); // free memory
+    delete[] reinterpret_cast<int8_t*>(arr_); // free memory
+  }
 
   sz_ = other.sz_;
 
@@ -78,16 +80,18 @@ template <typename T>
 Bicontainer<T>& Bicontainer<T>::operator=(Bicontainer<T>&& other) {
   Timer t("Move assignment");
 
-  for (size_t i = 0; i < sz_; i++)
-    (arr_ + i)->~T(); // explicitly delete arr members
+  if (sz_ > 0) {
+    for (size_t i = 0; i < sz_; i++)
+      (arr_ + i)->~T(); // explicitly delete arr members
 
-  delete[] reinterpret_cast<int8_t*>(arr_); // free memory
+    delete[] reinterpret_cast<int8_t*>(arr_); // free memory
+  }
 
   sz_ = other.sz_;
 
   arr_ = reinterpret_cast<T*>(new int8_t[sz_ * sizeof(T)]); // allocate memory for arr
   for (size_t i = 0; i < sz_; i++)
-    new(arr_ + i) T(std::move(other.arr_[i])); // create arr members using T copy constructor
+    new(arr_ + i) T(std::move(other.arr_[i])); // create arr members using T move constructor
 
   v_ = std::move(other.v_);
 
@@ -96,10 +100,14 @@ Bicontainer<T>& Bicontainer<T>::operator=(Bicontainer<T>&& other) {
 
 template <typename T>
 Bicontainer<T>::~Bicontainer() {
-  for (size_t i = 0; i < sz_; i++)
-    (arr_ + i)->~T(); // explicitly delete arr members
+  if (sz_ > 0) {
+    for (size_t i = 0; i < sz_; i++)
+      (arr_ + i)->~T(); // explicitly delete arr members
 
-  delete[] reinterpret_cast<int8_t*>(arr_); // free memory
+    delete[] reinterpret_cast<int8_t*>(arr_); // free memory
+  }
+
   v_.~vector(); // delete v
+  sz_ = 0;
 }
 
