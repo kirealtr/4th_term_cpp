@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "smart_ptr", "smart_ptr\smar
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vector_test", "vector_test\vector_test.vcxproj", "{B65A324C-2FAE-4523-9F78-175D92DD0C4E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LRU_cache", "LRU_cache\LRU_cache.vcxproj", "{01929DC7-08BE-4386-918E-2F19C600324D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{B65A324C-2FAE-4523-9F78-175D92DD0C4E}.Release|x64.Build.0 = Release|x64
 		{B65A324C-2FAE-4523-9F78-175D92DD0C4E}.Release|x86.ActiveCfg = Release|Win32
 		{B65A324C-2FAE-4523-9F78-175D92DD0C4E}.Release|x86.Build.0 = Release|Win32
+		{01929DC7-08BE-4386-918E-2F19C600324D}.Debug|x64.ActiveCfg = Debug|x64
+		{01929DC7-08BE-4386-918E-2F19C600324D}.Debug|x64.Build.0 = Debug|x64
+		{01929DC7-08BE-4386-918E-2F19C600324D}.Debug|x86.ActiveCfg = Debug|Win32
+		{01929DC7-08BE-4386-918E-2F19C600324D}.Debug|x86.Build.0 = Debug|Win32
+		{01929DC7-08BE-4386-918E-2F19C600324D}.Release|x64.ActiveCfg = Release|x64
+		{01929DC7-08BE-4386-918E-2F19C600324D}.Release|x64.Build.0 = Release|x64
+		{01929DC7-08BE-4386-918E-2F19C600324D}.Release|x86.ActiveCfg = Release|Win32
+		{01929DC7-08BE-4386-918E-2F19C600324D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
