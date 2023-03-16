@@ -4,7 +4,6 @@
 *.exe
 *.txt
 *.vscode
-*.py
 *.vs
 *.[Oo]bj
 *.pdb
