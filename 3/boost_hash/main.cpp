@@ -61,26 +61,26 @@ std::string GenerateRandom<std::string>() {
 }
 
 template <typename Func>
-void TestHashUniformity(Func& hash, std::ofstream& file) {
+void TestHashUniformity(Func& Hash, std::ofstream& file) {
   /*std::ofstream file;
   file.open(file_name);*/
 
   for (int i = 0; i < UNIFORMITY_TEST_SIZE - 1; i++) {
     std::string rand_str = GenerateRandom<std::string>();
-    file << hash(rand_str.c_str(), rand_str.size()) << ", ";
+    file << Hash(rand_str.c_str(), rand_str.size()) << ", ";
   }
   std::string rand_str = GenerateRandom<std::string>();
-  file << hash(rand_str.c_str(), rand_str.size()) << std::endl;
+  file << Hash(rand_str.c_str(), rand_str.size()) << std::endl;
 }
 
 template <typename Func>
-void TestHashCollisions(Func& hash, std::ofstream& file) {
+void TestHashCollisions(Func& Hash, std::ofstream& file) {
   std::unordered_set<unsigned int> hash_set;
   //std::array<unsigned int, COLLISIONS_TEST_SIZE> collisions_count;
   unsigned int collision_counter = 0;
   for (int i = 1; i < COLLISIONS_TEST_SIZE; i++) {
     std::string rand_str = GenerateRandom<std::string>();
-    collision_counter += !std::get<1>(hash_set.insert(hash(rand_str.c_str(), rand_str.size())));
+    collision_counter += !std::get<1>(hash_set.insert(Hash(rand_str.c_str(), rand_str.size())));
     //if hash already exist, false will be returned, so we increment collision counter
 
     file << i << ", " << collision_counter << std::endl;
