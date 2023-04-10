@@ -735,3 +735,70 @@ std::string_view, std::span
 
 	delete C(); // вызывается деструктор
 	operator delete(C); // вызывается соответствующая перегрузка без вызова конструктора 
+
+# Value categories
+
+## lvalue
+
+То, у чего можно взять адрес, например `иденитификатор` (имя переменной)
+
+rvalue-ссылка (&&) - это lvalue!
+
+	int x = 5;
+	int& rx = x;
+	int&& rrx = 10;
+	rx = rrx; // можно
+	rrx = x;
+	x = 0;
+	cout << rrx << x; // результат 50
+
+## rvalue
+
+То, что можно перемещать
+
+### xvalue
+
+Простроченные rvalue
+
+Иногда объединяют с lvalue в glvalue, так как их можно кастить
+
+### prvalue
+
+Истинные rvalue
+
+prvalue - это `литерал`, например 1, 2, 'c'
+
+## Коллапсирование ссылок
+
+Если компилятор сталкивается с нагромождением ссылок, он преобразует их по этим правилам:
+
+	& + & = &
+	& + && = &
+	&& + & = &
+	&& + && = &&
+
+## Преобразования типов
+
+### static cast
+
+### dynamic cast
+
+### reinterpret cast
+
+### c-style cast
+
+### const cast
+
+## Tuple-like types
+
+### Structured bindings
+
+	auto [a, b] = tpl;
+
+## Union-like types
+
+### std::variant
+
+Замена плюсовуму union.
+
+### std::variant
