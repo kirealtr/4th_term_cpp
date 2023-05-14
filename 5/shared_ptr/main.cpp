@@ -3,82 +3,53 @@
 #include <exception>
 #include <vector>
 
-template <typename T>//, class Deleter>
+template <typename T, class Deleter>
 struct ControlBlock{
-private:
-  /*struct BaseDeleterHolder {
-    virtual ~BaseDeleterHolder() {}
-    virtual const std::type_info& TypeInfo() const = 0;
-  };*/
-
-  /*template <class Deleter>
-  struct DeleterHolder : BaseDeleterHolder {
-    Deleter deleter;
-    DeleterHolder(const Deleter& del) : deleter(del) {}
-    const std::type_info& TypeInfo() const {
-      return typeid(Deleter);
-    }
-  };*/
-
-public:
   T* object;
   size_t counter;
-  //BaseDeleterHolder* del_holder;
-  //Deleter* deleter;
+  //Deleter* d;
 
- /* ControlBlock(T* ptr) : counter(1), object(ptr), 
-    deleter(&(new std::default_delete<T>)) {};*/
-
-  //ControlBlock(T* ptr, Deleter* del) : counter(1), object(ptr), deleter(del) {};
-  ControlBlock(T* ptr) : counter(1), object(ptr) {};
-
-  /*template <class Deleter>
-  const Deleter& GetDeleter() {
-    if (typeid(Deleter) != del_holder->TypeInfo())
-      throw std::runtime_error("Bad cast");
-    return static_cast<DeleterHolder<Deleter>*>(del_holder)->deleter;
-  }*/
+  ControlBlock(T* ptr) : counter(1), object(ptr) /*d(new Deleter)*/ {};
 
   ~ControlBlock() {
-    //*deleter(object);
-    delete object;
+    Deleter()(object);
+    //delete object;
     //delete deleter;
   }
 };
 
-template <typename T>
+template <typename T, class Deleter = std::default_delete<T>>
 class SharedPtr {
   T* ptr_ = nullptr;
   //size_t* counter_ = nullptr;
-  ControlBlock<T>* cb_ = nullptr;
+  //ControlBlock<T>* cb_ = nullptr;
+  ControlBlock<T, Deleter>* cb_ = nullptr;
 
-  SharedPtr(ControlBlock<T>* cb) : ptr_(cb->object), cb_(cb) {}
+  SharedPtr(ControlBlock<T, Deleter>* cb) : ptr_(cb->object), cb_(cb) {}
 
   template <typename U, typename... Args>
   friend SharedPtr<U> MakeShared(Args&&...);
 
 public:
   SharedPtr() {}
-  //SharedPtr(T* ptr) : ptr_(ptr), cb_(new ControlBlock<T, std::default_delete<T>>(ptr, new std::default_delete<T>)) {}
-  SharedPtr(T* ptr) : ptr_(ptr), cb_(new ControlBlock<T>(ptr)) {}
-  //template <class Deleter>
-  //SharedPtr(T* ptr, const Deleter& d) : ptr_(ptr), cb_(new ControlBlock<T, Deleter>(ptr, &d)) {}
+  //SharedPtr(T* ptr) : ptr_(ptr), cb_(new ControlBlock<T, std::default_delete<T>>(ptr)) {}
 
+  SharedPtr(T* ptr) : ptr_(ptr), cb_(new ControlBlock<T, Deleter>(ptr)) {}
 
-  SharedPtr(SharedPtr<T>&& other) : ptr_(std::move(other.ptr_)), cb_(std::move(other.cb_)) {}
+  SharedPtr(SharedPtr<T, Deleter>&& other) : ptr_(std::move(other.ptr_)), cb_(std::move(other.cb_)) {}
 
-  const SharedPtr& operator=(SharedPtr<T>&& other) {
+  const SharedPtr& operator=(SharedPtr<T, Deleter>&& other) {
     this->~SharedPtr();
     ptr_ = std::move(other.ptr_);
     cb_ = std::move(other.cb_);
     return *this;
   }
   
-  SharedPtr(const SharedPtr<T>& other) : ptr_(other.ptr_), cb_(other.cb_) {
+  SharedPtr(const SharedPtr<T, Deleter>& other) : ptr_(other.ptr_), cb_(other.cb_) {
     cb_->counter++;
   }
 
-  const SharedPtr& operator=(const SharedPtr<T>& other) {
+  const SharedPtr& operator=(const SharedPtr<T, Deleter>& other) {
     this->~SharedPtr();
     ptr_ = other.ptr_;
     cb_ = other.cb_;
@@ -116,10 +87,10 @@ public:
 };
 
 template <typename T, typename... Args>
-SharedPtr<T> MakeShared(Args&&... args) {
+SharedPtr<T, std::default_delete<T>> MakeShared(Args&&... args) {
   try {
-    auto cb = new ControlBlock<T>(new T(std::forward<Args>(args)...));
-    return SharedPtr<T>(cb);
+    auto cb = new ControlBlock<T, std::default_delete<T>>(new T(std::forward<Args>(args)...));
+    return SharedPtr<T, std::default_delete<T>>(cb);
   } catch (const std::bad_alloc& e) {
     std::cout << "Allocation failed" << std::endl;
     throw e;
@@ -129,9 +100,24 @@ SharedPtr<T> MakeShared(Args&&... args) {
   }
 }
 
+template <typename T>
+struct MyDeleter
+{
+  void operator()(T* p)
+  {
+    std::cout << "Variable " << *p << " was deleted with MyDeleter" << std::endl;
+    free(p);
+  }
+};
+
+void operator delete(void* p) {
+  std::cout << "Variable " << *static_cast<int*>(p) << " was deleted with std::default_delete" << std::endl;
+  free(p);
+}
+
 int main() {
-  auto p1 = MakeShared<int>(5);
-  auto p2 = MakeShared<int>(6);
+  auto p1 = MakeShared<int>(1);
+  auto p2 = MakeShared<int>(2);
   SharedPtr<int> p3(p2);
 
   std::cout << p3.UseCount() << std::endl;
@@ -142,9 +128,9 @@ int main() {
   SharedPtr<int> p4(std::move(p3));
   std::cout << p3.UseCount() << std::endl;
   std::cout << *p4 << std::endl;
-
-  SharedPtr<int> p5;
+  
   try {
+    SharedPtr<int> p5;
     std::cout << *p5 << std::endl;
   } catch (const std::runtime_error& e) {
     std::cout << e.what() << std::endl;
@@ -156,4 +142,9 @@ int main() {
   catch (const std::length_error& e) {
     std::cout << e.what() << std::endl;
   }
+
+  //MyDeleter<int> d;
+  SharedPtr<int, MyDeleter<int>> p7(new int(7));
+  auto p8 = p7;
+  *p8 += 1;
 }
