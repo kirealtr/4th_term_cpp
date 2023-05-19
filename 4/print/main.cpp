@@ -9,7 +9,7 @@ void Print(Head&& head, Tail&&... tail) {
 }
 
 int main() {
-	std::string str = "Klim don't reduce the mark please";
+	std::string str = "eeeeeeeeee";
 	int a = 5245;
 	Print(a, str, std::move(str), "Hello world");
 }
