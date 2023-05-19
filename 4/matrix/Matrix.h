@@ -57,20 +57,22 @@ Matrix<T, M, N>::Matrix(initializer_list<initializer_list<T>> lst) {
 
 template <typename T, size_t M, size_t N>
 Matrix<T, M, N>::Matrix(const Matrix<T, M, N>& other) {
-  for (size_t i = 0; i < M; i++) {
-    for (size_t j = 0; j < N; j++) {
-      cont_[i][j] = other[i][j];
-    }
-  }
+  //for (size_t i = 0; i < M; i++) {
+  //  for (size_t j = 0; j < N; j++) {
+  //    cont_[i][j] = other[i][j];
+  //  }
+  //}
+  cont_ = other.cont_;
 }
 
 template <typename T, size_t M, size_t N>
 Matrix<T, M, N>::Matrix(Matrix<T, M, N>&& other) {
-  for (size_t i = 0; i < M; i++) {
-    for (size_t j = 0; j < N; j++) {
-      cont_[i][j] = move(other[i][j]);
-    }
-  }
+  //for (size_t i = 0; i < M; i++) {
+  //  for (size_t j = 0; j < N; j++) {
+  //    cont_[i][j] = move(other[i][j]);
+  //  }
+  //}
+  cont_ = move(other.cont_);
 }
 
 template <typename T, size_t M, size_t N>
